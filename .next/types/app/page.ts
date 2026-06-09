@@ -1,4 +1,4 @@
-// File: /home/kaminnit/vscode/todoApp/todoAppFront/src/app/page.js
+// File: /home/kaminnit/Downloads/todoApp/todoAppFront/src/app/page.js
 import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
