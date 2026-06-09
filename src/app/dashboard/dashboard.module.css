@@ -1,0 +1,171 @@
+.wrap {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.25rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.nav { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+
+.navItem {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  transition: color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.navItem:hover, .active { color: var(--text); background: var(--surface2); }
+
+.logout {
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  padding: 0.5rem;
+  border-radius: 6px;
+  text-align: left;
+  transition: color 0.2s;
+}
+.logout:hover { color: var(--danger); }
+
+/* Main */
+.main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.title { font-size: 1.75rem; font-weight: 700; }
+.sub { color: var(--muted); font-size: 0.875rem; margin-top: 0.25rem; }
+
+/* Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.statNum { font-size: 2rem; font-weight: 800; }
+.statLabel { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Task Grid */
+.taskGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.taskCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.taskCard:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.taskTop { display: flex; gap: 0.5rem; align-items: center; }
+
+.priority {
+  font-size: 0.7rem;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.category {
+  font-size: 0.7rem;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.taskTitle { font-size: 1rem; font-weight: 600; color: var(--text); }
+.taskDesc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.deadline { font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+.taskActions { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+
+.status {
+  font-size: 0.7rem;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--muted);
+}
+.status[data-status="completed"] { color: var(--success); background: rgba(74,222,128,0.1); }
+.status[data-status="in-progress"] { color: var(--accent); background: rgba(124,106,255,0.1); }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.pageInfo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 4rem;
+  font-size: 0.9rem;
+}
