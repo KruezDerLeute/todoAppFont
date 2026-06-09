@@ -20,61 +20,34 @@ export default function Dashboard() {
     page: 1,
     limit: 8,
     priority: "",
-    category: "",
     status: "",
+    category: "",
+    sort: "createdAt",
+    order: "desc",
   });
   const [loading, setLoading] = useState(true);
 
   const stats = {
-    total: tasks.length,
+    total: meta.total,
     done: tasks.filter((t) => t.status === "completed").length,
     pending: tasks.filter((t) => t.status !== "completed").length,
     high: tasks.filter((t) => t.priority === "high").length,
   };
 
-  // Client-side filtering
-  const filteredTasks = tasks.filter((t) => {
-    if (filters.priority && t.priority !== filters.priority) return false;
-    if (filters.status && t.status !== filters.status) return false;
-    if (
-      filters.category &&
-      !t.category?.toLowerCase().includes(filters.category.toLowerCase())
-    )
-      return false;
-    return true;
-  });
-
-  const totalFiltered = filteredTasks.length;
-  const totalPagesLocal = Math.max(
-    1,
-    Math.ceil(totalFiltered / (filters.limit || 1)),
-  );
-  // Ensure current page is within range
-  useEffect(() => {
-    if (filters.page > totalPagesLocal)
-      setFilters((f) => ({ ...f, page: totalPagesLocal }));
-  }, [totalPagesLocal]);
-
-  const startIdx = (filters.page - 1) * filters.limit;
-  const pagedTasks = filteredTasks.slice(startIdx, startIdx + filters.limit);
-
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // Only send actual filter criteria to server (not page/limit)
-      const serverFilters = {
-        ...(filters.priority && { priority: filters.priority }),
-        ...(filters.status && { status: filters.status }),
-        ...(filters.category && { category: filters.category }),
-      };
-      const res = await getTasks(serverFilters);
-      setTasks(res.tasks || res.data || []);
-      if (res.totalPages)
-        setMeta({
-          total: res.total,
-          totalPages: res.totalPages,
-          currentPage: res.currentPage,
-        });
+      // Send everything to the server, strip empty strings
+      const params = Object.fromEntries(
+        Object.entries(filters).filter(([, v]) => v !== ""),
+      );
+      const res = await getTasks(params);
+      setTasks(res.tasks || []);
+      setMeta({
+        total: res.total,
+        totalPages: res.totalPages,
+        currentPage: res.currentPage,
+      });
     } catch {
       router.push("/login");
     } finally {
@@ -93,14 +66,12 @@ export default function Dashboard() {
   };
 
   const markCompleted = async (id) => {
+    setTasks((prev) =>
+      prev.map((t) => (t._id === id ? { ...t, status: "completed" } : t)),
+    );
     try {
-      // Optimistic UI update
-      setTasks((prev) =>
-        prev.map((t) => (t._id === id ? { ...t, status: "completed" } : t)),
-      );
       await updateTask(id, { status: "completed" });
-    } catch (e) {
-      // Revert on error and reload
+    } catch {
       load();
     }
   };
@@ -146,11 +117,7 @@ export default function Dashboard() {
         {/* Stats */}
         <div className={styles.statsGrid}>
           {[
-            {
-              label: "Total",
-              value: meta.total || stats.total,
-              color: "#7c6aff",
-            },
+            { label: "Total", value: meta.total, color: "#7c6aff" },
             { label: "Completed", value: stats.done, color: "#4ade80" },
             { label: "Pending", value: stats.pending, color: "#facc15" },
             { label: "High Priority", value: stats.high, color: "#f87171" },
@@ -164,7 +131,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Filters */}
+        {/* Filters + Sorting */}
         <div className={styles.filters}>
           <select
             value={filters.priority}
@@ -192,12 +159,27 @@ export default function Dashboard() {
             onChange={(e) => setFilter("category", e.target.value)}
             style={{ width: "180px" }}
           />
+          <select
+            value={`${filters.sort}-${filters.order}`}
+            onChange={(e) => {
+              const [sort, order] = e.target.value.split("-");
+              setFilters((f) => ({ ...f, sort, order, page: 1 }));
+            }}
+            style={{ width: "auto" }}
+          >
+            <option value='createdAt-desc'>Newest first</option>
+            <option value='createdAt-asc'>Oldest first</option>
+            <option value='deadline-asc'>Deadline (earliest)</option>
+            <option value='deadline-desc'>Deadline (latest)</option>
+            <option value='priority-desc'>Priority (high → low)</option>
+            <option value='priority-asc'>Priority (low → high)</option>
+          </select>
         </div>
 
         {/* Tasks */}
         {loading ? (
           <p className={styles.empty}>Loading...</p>
-        ) : totalFiltered === 0 ? (
+        ) : tasks.length === 0 ? (
           <div className={styles.empty}>
             <p>No tasks match the current filters.</p>
             <Link href='/tasks/new'>
@@ -208,7 +190,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className={styles.taskGrid}>
-            {pagedTasks.map((t) => (
+            {tasks.map((t) => (
               <div
                 key={t._id}
                 className={styles.taskCard + " fade-up"}
@@ -271,7 +253,7 @@ export default function Dashboard() {
         )}
 
         {/* Pagination */}
-        {totalPagesLocal > 1 && (
+        {meta.totalPages > 1 && (
           <div className={styles.pagination}>
             <button
               className='btn-ghost'
@@ -281,11 +263,11 @@ export default function Dashboard() {
               ← Prev
             </button>
             <span className={styles.pageInfo}>
-              {filters.page} / {totalPagesLocal}
+              {filters.page} / {meta.totalPages}
             </span>
             <button
               className='btn-ghost'
-              disabled={filters.page >= totalPagesLocal}
+              disabled={filters.page >= meta.totalPages}
               onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
             >
               Next →
